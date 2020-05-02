@@ -20,15 +20,15 @@ optional arguments:
   --silent         Silence all logging, only show output filenames as result
 ```
 
-Use the `--silent` flag if you wish to process the output files with other programs alone a pipe.
-Only the outfiles files, delimited by `,` will be outputted (logging will be set to error).
+Use the `--silent` flag if you wish to process the output files with other programs along a pipe.
+Only the outfiles files, delimited by `,` will be written to STDOUT (logging will be set to error).
 
 ## Docker
 ### Installation
 `docker build -t pdf2text:latest .`
 
 ### Usage
-The `Dockerfile` will mount to `VOLUMES` to `/input` and `/output`. Assign them to local folders you want to use.
+The `Dockerfile` will mount two `VOLUMES` to `/input` and `/output`. Assign them to local folders you want to use.
 
 ```sh
 PDF_INPUT_DIR="/tmp/pdf_parser_input"
