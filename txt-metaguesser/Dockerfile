@@ -17,12 +17,12 @@ ENV PYTHONFAULTHANDLER=1 \
 RUN pip install pipenv && mkdir /txt-metaguesser && mkdir /input 
 VOLUME /input
 
-ARG SQL_ALCHEMY__URI
-ENV SQL_ALCHEMY__URI=${SQL_ALCHEMY__URI}
-
 WORKDIR /txt-metaguesser
 COPY src/ /txt-metaguesser/
 COPY Pipfile /txt-metaguesser/
 RUN pipenv install --deploy --ignore-pipfile
+
+ARG SQL_ALCHEMY__URI
+ENV SQL_ALCHEMY__URI=${SQL_ALCHEMY__URI}
 
 CMD "pipenv run python3 main.py"
