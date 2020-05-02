@@ -25,4 +25,5 @@ RUN pipenv install --deploy --ignore-pipfile
 ARG SQL_ALCHEMY__URI
 ENV SQL_ALCHEMY__URI=${SQL_ALCHEMY__URI}
 
-CMD "pipenv run python3 main.py"
+ENTRYPOINT ["pipenv", "run", "python3"]
+CMD ["main.py"]

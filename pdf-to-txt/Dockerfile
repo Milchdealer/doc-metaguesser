@@ -32,4 +32,5 @@ COPY src/ /pdf2txt/
 COPY Pipfile /pdf2txt/
 RUN pipenv install --deploy --ignore-pipfile
 
-CMD "pipenv run python3 main.py --input /input --output /output"
+ENTRYPOINT ["pipenv", "run", "python3"]
+CMD "main.py --input /input --output /output"
