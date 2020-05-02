@@ -6,7 +6,7 @@
 import logging
 import os
 
-from .db import (
+from db import (
 	make_connection,
 	create_relations,
 	DocumentStore,
