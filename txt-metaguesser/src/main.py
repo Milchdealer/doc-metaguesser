@@ -4,27 +4,21 @@
 	Tries to guess metadata about PDF documents.
 """
 import logging
-import argparse
 import os
 
-parser = argparse.ArgumentParser(description="")
-parser.add_argument("--input", type=str, required=True, help="Path pointing to a PDF or a folder with PDFs to parse")
-parser.add_argument(
-	"--silent",
-	action="store_const",
-	const=True,
-	default=False,
-	help="Silence all logging, only show output filenames as result"
+from .db import (
+	make_connection,
+	create_relations,
+	DocumentStore,
+	MetadataStore
 )
-if __name__ == "__main__":
-	maria_db_credentials = {
-		user: os.getenv("MARIA_DB__USER", "document"),
-		host: os.getenv("MARIA_DB__HOST", "localhost"),
-		port: int(os.getenv("MARIA_DB__PORT", "3306")),
-		database: os.getenv("MARIA_DB__DATABASE", "document"),
-		password: os.getenv("MARIA_DB__PASSWORD"),
-	}
-	db_conn = mariadb.connect(**maria_db_credentials)
-	del maria_db_credentials
+
+if __name__ == '__main__':
+	engine, session = make_connection()
+	create_relations(engine)
+
+	d1 = DocumentStore(filename="test", content="abc")
+	session.add(d1)
+	session.commit()
 else:
-	parser.parse_args([])
+	logging.debug("Imported main.py file which is an entrypoint")
