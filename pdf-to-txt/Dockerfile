@@ -17,7 +17,7 @@ ENV PYTHONFAULTHANDLER=1 \
 
 # Install poppler-utils for pdf2image and tesseract-ocr for OCR
 RUN apt-get update && apt-get install --yes poppler-utils tesseract-ocr \
-	&& apt-get autoremove --yes \
+	&& apt-get clean --yes \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& pip install pipenv
 

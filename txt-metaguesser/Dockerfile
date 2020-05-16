@@ -4,6 +4,7 @@ FROM python:3.7
 LABEL MAINTAINER="Milchdealer"
 LABEL DESCRIPTION="Reads text and guesses meta information."
 
+
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
   PYTHONHASHSEED=random \
@@ -14,7 +15,7 @@ ENV PYTHONFAULTHANDLER=1 \
   PIPENV_COLORBLIND=true \
   PIPENV_NOSPIN=true
 
-RUN pip install pipenv && mkdir /txt-metaguesser && mkdir /input 
+RUN pip install pipenv && mkdir /txt-metaguesser && mkdir /input
 VOLUME /input
 
 WORKDIR /txt-metaguesser
@@ -23,7 +24,7 @@ COPY Pipfile /txt-metaguesser/
 RUN pipenv install --deploy --ignore-pipfile
 
 ARG SQL_ALCHEMY__URI
-ENV SQL_ALCHEMY__URI=${SQL_ALCHEMY__URI}
+ENV TXT_METAGUESSER__SQL_ALCHEMY__URI=${SQL_ALCHEMY__URI}
 
 ENTRYPOINT ["pipenv", "run", "python3"]
 CMD ["main.py"]
