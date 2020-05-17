@@ -3,9 +3,12 @@
 """
     Utilities for handling the documents.
 """
-from db import DocumentStore, MetadataStore
+import os
+from hashlib import sha1
+from typing import TextIO
 
-from typing import TextIO, Optional
+from db import DocumentStore
+
 
 MAX_CHECKSUM_INGEST_LENGTH = (
     1000  # If this is changed the checksums won't add up anymore.
@@ -59,24 +62,23 @@ def create_new_document(
     )
 
 
-def get_or_create_document(file_path: str, session) -> int:
+def get_or_create_document(file_path: str, session) -> DocumentStore:
     """ Checks if the file already exists in the store and creates it if not.
         :return int: The id column of the entry
     """
     with open(file_path, "r") as f:
         checksum = create_checksum(f)
-        _id = (
-            session.query(DocumentStore.id)
+        ds = (
+            session.query(DocumentStore)
             .filter_by(
                 DocumentStore.checksum == checksum,
                 DocumentStore.filename == os.path.basename(file_path),
             )
-            .scalar()
+            .first()
         )
-        if not _id:
+        if not ds:
             ds = create_new_document(file_path, f)
             session.add(ds)
             session.commit()
-            _id = ds.id
 
-    return _id
+    return ds

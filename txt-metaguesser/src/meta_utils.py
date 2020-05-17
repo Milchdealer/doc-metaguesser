@@ -2,16 +2,14 @@
 """
 	Utilities for guessing metadata.
 """
+from db import DocumentStore
 
 
-def guess_metadata(document_id: int, session):
+def guess_type(document: DocumentStore):
+    """ Guesses the type of the entry. """
+
+
+def guess_metadata(document: DocumentStore, session):
     """  Entry point to start guessing metadata."""
-
-    content = (
-        session.query(DocumentStore.content)
-        .filter_by(DocumentStore.id == document_id)
-        .first()
-    )
-
-    guess_type()  # letter, article, ...
+    guess_type(document)  # letter, article, ...
     # switch type and go from here

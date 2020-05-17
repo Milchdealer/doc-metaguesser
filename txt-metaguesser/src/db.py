@@ -32,6 +32,7 @@ class DocumentStore(Base):
     created_on = Column(DateTime(), default=datetime.now)
     updated_on = Column(DateTime(), default=datetime.now, onupdate=datetime.now)
 
+
 class MetadataStore(Base):
     __tablename__ = "document_metadata"
     id = Column(Integer, primary_key=True)
@@ -42,12 +43,12 @@ class MetadataStore(Base):
     updated_on = Column(DateTime(), default=datetime.now, onupdate=datetime.now)
 
 
-def create_relations(engine, checkfirst=True):
+def create_relations(engine, checkfirst: bool = True):
     """ Creates all relations needed. """
     Base.metadata.create_all(engine, checkfirst=checkfirst)
 
 
-def make_connection() -> sqlalchemy.engine.Engine, Session:
+def make_connection():
     """ Returns the engine. """
     sqlalchemy_uri = os.getenv("TXT_METAGUESSER__SQL_ALCHEMY__URI")
     if not sqlalchemy_uri:
