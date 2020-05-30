@@ -24,10 +24,7 @@ if __name__ == "__main__":
             if os.path.splitext(file_path)[1] != ".txt":
                 continue
             logging.info("Found txt file %s", file_path)
-            documents.append(get_or_create_document(file_path, session))
-
-    for document in documents:
-        guess_metadata(document, session)
+            guess_metadata(get_or_create_document(file_path, session), session)
 
 else:
     logging.warning("Imported main.py file which is an entrypoint")
