@@ -16,12 +16,14 @@ def guess_metadata(document: DocumentStore, session):
     for plugin in plugins.split(","):
         meta_module = import_module(".%s", "plugins")
         metadata = meta_module.guess_metadata()
-        existing_metadata = session.query(MetadataStore)
+        existing_metadata = (
+            session.query(MetadataStore)
             .filter_by(
                 MetadataStore.document_id == document.id,
-                MetadataStore.metadata_label == metadata.metadata_label,
+                MetadataStore.metadata_label == metadata.me,
             )
             .first()
+        )
 
         if existing_metadata:
             existing_metadata.metadata_value = metadata.metadata_value
