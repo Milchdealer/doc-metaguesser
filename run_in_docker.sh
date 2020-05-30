@@ -19,10 +19,10 @@ do
 	TMP_OUT_DIR=$TMP_DIR/$INPUT_DIR
 	mkdir -p $TMP_OUT_DIR
 
-	docker run --read-only -v ${INPUT_DIR}:/input -v ${TMP_OUT_DIR}:/output pdf-to-text:latest
+	docker run --read-only -v ${INPUT_DIR}:/input -v ${TMP_OUT_DIR}:/output pdf-to-text
 	docker run --read-only -v ${TMP_OUT_DIR}:/input \
 		-e TXT_METAGUESSER__SQL_ALCHEMY__URI=${TXT_METAGUESSER__SQL_ALCHEMY__URI} \
-		txt-metaguesser:latest
+		txt-metaguesser
 
 	rm -rf $TMP_OUT_DIR
 done
