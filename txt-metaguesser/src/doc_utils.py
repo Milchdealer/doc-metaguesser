@@ -29,11 +29,10 @@ def create_checksum(document: TextIO, reset_buffer: int = 0) -> str:
 
 
 def guess_page_num(document: TextIO, reset_buffer: int = 0) -> int:
-    """ Tries to guess the page count by counting the PAGE_SEAPARTER. """
+    """ Tries to guess the page count by counting the PAGE_SEPARATER. """
     counter = 0
     for line in document:
-        if line == PAGE_SEPARATER:
-            counter += 1
+        counter += line.count(PAGE_SEPARATER)
 
     if reset_buffer >= 0:
         document.seek(reset_buffer)

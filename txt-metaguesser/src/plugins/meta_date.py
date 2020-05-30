@@ -11,11 +11,14 @@
 """
 import os
 import re
+import locale
+import logging
 from datetime import datetime
 from typing import Optional, List, Dict
 
 from db import DocumentStore, MetadataStore
 
+LOCALE = os.getenv("TXT_METAGUESSER__META_DATE__LOCALE")
 PATTERNS = {
     "GERMAN_LONG": {
         "regex": re.compile(r"(\d{2}\.\d{2}\.\d{4})"),
@@ -24,6 +27,10 @@ PATTERNS = {
     "GERMAN_SHORT": {
         "regex": re.compile(r"(\d{2}\.\d{2}\.\d{2})"),
         "date_pattern": "%d.%m.%y",
+    },
+    "GERMAN_LOCALE": {
+        "regex": re.compile(r"(\d{1,2}\.\s\S+\s\d{4})"),
+        "date_pattern": "%d. %B %Y",
     },
 }
 
@@ -43,11 +50,17 @@ def guess_metadata(document: DocumentStore) -> MetadataStore:
         :returns MetadataStore:
     """
     pattern_names = os.getenv(
-        "TXT_METAGUESSER__META_DATE__PATTERNS", "GERMAN_LONG,GERMAN_SHORT"
+        "TXT_METAGUESSER__META_DATE__PATTERNS",
+        "GERMAN_LONG,GERMAN_SHORT,GERMAN_LOCALE",
     )
     patterns = [PATTERNS[name] for name in pattern_names.split(",") if name in PATTERNS]
     if not patterns:
         raise ValueError("No pattern specified")
+
+    if LOCALE:
+        logging.info("Changing locale temporarily to %s", LOCALE)
+        old_locale = ".".join(locale.getlocale())
+        locale.set_locale(locale.LC_ALL, LOCALE)
 
     for line in document.content.split("\n"):
         document_date = search_date_in_line(patterns, line)
@@ -57,3 +70,6 @@ def guess_metadata(document: DocumentStore) -> MetadataStore:
                 metadata_label="document_date",
                 metadata_value=document_date.strftime("%Y-%m-%d"),
             )
+
+    if LOCALE and old_locale:
+        locale.set_locale(locale.LC_ALL, old_locale)

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # *-* coding: utf-8 *-*
 """
-	Converts PDFs to text.
+    Converts PDFs to text.
 """
 import logging
 import argparse
@@ -19,10 +19,10 @@ PAGE_SEPARATER = "\n" + ("=" * 50) + "\n"
 
 def save_pdf_to_jpg(pdf: str, path: str) -> (str, List[str]):
     """ Saves the given PDF to one JPG per page to the path. 
-		:param pdf: str, path to the PDF
-		:param path: str, path where to store the images
-		:returns str, List[str]: File base name, List of all file names associated
-	"""
+        :param pdf: str, path to the PDF
+        :param path: str, path where to store the images
+        :returns str, List[str]: File base name, List of all file names associated
+    """
     filenames = []
     logging.debug("Convert PDF to image")
     pages = convert_from_path(pdf, 500)
@@ -43,12 +43,12 @@ def convert_image_to_text(
     base_name: str, images: List[str], output_path: str, add_page_separater: bool = True
 ) -> str:
     """ Takes images as input and converts their content to text.
-		:param base_name: str, file base name
-		:param images: List[str], path to the images to read, in order
-		:param output_path: str, Where to write the result
-		:param add_page_separater: Add PAGE_SEPARATER between pages
-		:returns str: file name of the output TXT
-	"""
+        :param base_name: str, file base name
+        :param images: List[str], path to the images to read, in order
+        :param output_path: str, Where to write the result
+        :param add_page_separater: Add PAGE_SEPARATER between pages
+        :returns str: file name of the output TXT
+    """
     first_page = True
     output_filename = os.path.join(output_path, base_name + ".txt")
     logging.info("Saving results to %s", output_filename)
@@ -93,25 +93,31 @@ if __name__ == "__main__":
         documents = []
         if os.path.isdir(args.input):
             logging.debug("Input is a directory, searching for PDFs and JPGs")
-            for filename in os.listdir(args.input):
-                file_path = os.path.join(args.input, filename)
-                logging.debug("Found file: %s, path: %s", filename, file_path)
-                if not os.path.isfile(file_path):
-                    continue
-                if mimetypes.guess_type(file_path)[0] == "image/jpeg":
-                    # Add images directly
-                    documents.append(
-                        (os.path.splitext(os.path.basename(file_path))[0], file_path)
-                    )
-                    continue
-                if mimetypes.guess_type(file_path)[0] != "application/pdf":
-                    logging.debug("File '%s' is not PDF", file_path)
-                    continue
+            for root, dirs, files in os.walk(args.input):
+                for filename in files:
+                    file_path = os.path.join(root, filename)
+                    logging.debug("Found file: %s, path: %s", filename, file_path)
+                    if not os.path.isfile(file_path):
+                        continue
 
-                documents.append(save_pdf_to_jpg(file_path, tmpdirname))
+                    if mimetypes.guess_type(file_path)[0] == "image/jpeg":
+                        # Add images directly
+                        documents.append(
+                            (
+                                os.path.splitext(os.path.basename(file_path))[0],
+                                [file_path],
+                            )
+                        )
+                    elif mimetypes.guess_type(file_path)[0] != "application/pdf":
+                        logging.debug("File '%s' is not PDF", file_path)
+                    else:
+                        documents.append(save_pdf_to_jpg(file_path, tmpdirname))
         else:
             logging.debug("Input is a file")
-            documents.append(save_pdf_to_jpg(args.input, tmpdirname))
+            if mimetypes.guess_type(file_path)[0] == "image/jpeg":
+                documents.append((os.path.splitext(args.input)[0], [args.input]))
+            else:
+                documents.append(save_pdf_to_jpg(args.input, tmpdirname))
 
         output = []
         for document in documents:

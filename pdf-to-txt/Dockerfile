@@ -1,5 +1,5 @@
 # Docker image for OCR with Python
-FROM python:3.7
+FROM python:3.7-slim
 
 LABEL MAINTAINER="Milchdealer"
 LABEL DESCRIPTION="Converts PDFs to images and runs OCR on them \
