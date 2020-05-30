@@ -11,6 +11,7 @@ TMP_DIR=/tmp/`date +%F"-"%H%M`
 
 # Build the docker images
 docker build -t pdf2txt ./pdf-to-text
+
 docker build -t txt-metaguesser ./txt-metaguesser
 
 # Parse all input directories
@@ -20,6 +21,7 @@ do
 	mkdir -p $TMP_OUT_DIR
 
 	docker run -v ${INPUT_DIR}:/input:ro -v ${TMP_OUT_DIR}:/output pdf2txt
+	
 	docker run -v ${TMP_OUT_DIR}:/input:ro \
 		-e TXT_METAGUESSER__SQL_ALCHEMY__URI=${TXT_METAGUESSER__SQL_ALCHEMY__URI} \
 		txt-metaguesser
