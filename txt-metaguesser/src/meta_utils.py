@@ -5,7 +5,6 @@
 import os
 import logging
 from importlib import import_module
-from datetime import datetime
 
 from sqlalchemy import and_
 
@@ -37,7 +36,6 @@ def guess_metadata(document: DocumentStore, session):
 
         if existing_metadata:
             existing_metadata.metadata_value = metadata.metadata_value
-            existing_metadata.updated_on = datetime.now
         else:
             session.add(metadata)
 

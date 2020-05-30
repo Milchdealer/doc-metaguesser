@@ -44,7 +44,7 @@ def create_new_document(
     file_path: str, document: TextIO, reset_buffer: int = 0
 ) -> DocumentStore:
     """ Creates a new DocumentStore entry. """
-    filename = os.path.basename(file_path)
+    filename = file_path
     name = os.path.splitext(filename)[0]
     content = document.read(MAX_CONTENT_LENGTH)
     page_num = guess_page_num(document)

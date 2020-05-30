@@ -40,7 +40,14 @@ def search_date_in_line(patterns: List[Dict], line: str) -> Optional[datetime]:
     for pattern in patterns:
         match = pattern["regex"].search(line)
         if match:
-            return datetime.strptime(match.group(0), pattern["date_pattern"])
+            try:
+                date_string = match.group(0)
+                if "marz" in date_string.lower():
+                    date_string = date_string.replace("a", "ä")
+                return datetime.strptime(date_string, pattern["date_pattern"])
+            except ValueError:
+                pass
+
     return None
 
 
@@ -58,9 +65,9 @@ def guess_metadata(document: DocumentStore) -> MetadataStore:
         raise ValueError("No pattern specified")
 
     if LOCALE:
-        logging.info("Changing locale temporarily to %s", LOCALE)
         old_locale = ".".join(locale.getlocale())
-        locale.set_locale(locale.LC_ALL, LOCALE)
+        logging.info("Changing locale temporarily from %s to %s", old_locale, LOCALE)
+        locale.setlocale(locale.LC_ALL, LOCALE)
 
     for line in document.content.split("\n"):
         document_date = search_date_in_line(patterns, line)
@@ -72,4 +79,5 @@ def guess_metadata(document: DocumentStore) -> MetadataStore:
             )
 
     if LOCALE and old_locale:
-        locale.set_locale(locale.LC_ALL, old_locale)
+        locale.setlocale(locale.LC_ALL, old_locale)
+        logging.debug("Changed locale back to %s", old_locale)

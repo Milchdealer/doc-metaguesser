@@ -12,7 +12,19 @@ ENV PYTHONFAULTHANDLER=1 \
   PIP_DEFAULT_TIMEOUT=100 \
   PIPENV_HIDE_EMOJIS=true \
   PIPENV_COLORBLIND=true \
-  PIPENV_NOSPIN=true
+  PIPENV_NOSPIN=true \
+  DEBIAN_FRONTEND=noninteractive
+
+# Since the datetime setting for month's names needs locales:
+# E.g. 1. Januar 2020 in DE will be 1. January 2020 in EN
+ARG LOCALE="de_DE.UTF-8"
+ARG LANGUAGE="de_DE"
+RUN apt-get update && apt-get install -y --no-install-recommends locales \
+	&& locale-gen $LOCALE \
+	&& dpkg-reconfigure --frontend=noninteractive locales \
+	&& localedef -f UTF-8 -i $LANGUAGE $LOCALE \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/*
 
 ARG INPUT_DIR="/input"
 ENV TXT_METAGUESSER__INPUT_DIR=${INPUT_DIR}
@@ -20,10 +32,10 @@ RUN pip install pipenv && mkdir /txt-metaguesser && mkdir ${TXT_METAGUESSER__INP
 VOLUME ${TXT_METAGUESSER__INPUT_DIR}
 
 WORKDIR /txt-metaguesser
-COPY src/ /txt-metaguesser/
 COPY Pipfile /txt-metaguesser/
 RUN pipenv install --deploy --ignore-pipfile
 
+COPY src/ /txt-metaguesser/
 ARG PLUGINS="meta_date"
 ENV TXT_METAGUESSER__PLUGINS=${PLUGINS}
 

@@ -24,15 +24,17 @@ do
 	echo "Created temporary directory $TMP_OUT_DIR"
 
 	echo "Running pdf2txt in docker with ${INPUT_DIR} as input directory"
-	docker run -v ${INPUT_DIR}:/input:ro -v ${TMP_OUT_DIR}:/output pdf2txt
+	docker run -v ${INPUT_DIR}:/input:ro -v ${TMP_OUT_DIR}:/output pdf2txt main.py --input /input --output /output
 	echo "Running txt-metaguesser in docker on the result of ${INPUT_DIR}"
 	docker run -v ${TMP_OUT_DIR}:/input:ro \
 		-e TXT_METAGUESSER__SQL_ALCHEMY__URI=${TXT_METAGUESSER__SQL_ALCHEMY__URI} \
+		-e TXT_METAGUESSER__META_DATE__LOCALE="de_DE.UTF-8" \
 		txt-metaguesser
 
 	rm -rf $TMP_OUT_DIR
 	echo "Removed temporary directory $TMP_OUT_DIR"
 done
 
+# Cleanup
 rm -r $TMP_DIR
 echo "Removed temporary directory $TMP_DIR"
