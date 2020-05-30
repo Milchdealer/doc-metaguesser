@@ -15,16 +15,17 @@ ENV PYTHONFAULTHANDLER=1 \
   PIPENV_COLORBLIND=true \
   PIPENV_NOSPIN=true
 
-RUN pip install pipenv && mkdir /txt-metaguesser && mkdir /input
-VOLUME /input
+ENV TXT_METAGUESSER__INPUT_DIR="/input"
+RUN pip install pipenv && mkdir /txt-metaguesser && mkdir ${TXT_METAGUESSER__INPUT_DIR}
+VOLUME ${TXT_METAGUESSER__INPUT_DIR}
 
 WORKDIR /txt-metaguesser
 COPY src/ /txt-metaguesser/
 COPY Pipfile /txt-metaguesser/
 RUN pipenv install --deploy --ignore-pipfile
 
-ARG SQL_ALCHEMY__URI
-ENV TXT_METAGUESSER__SQL_ALCHEMY__URI=${SQL_ALCHEMY__URI}
+ARG PLUGINS="meta_date"
+ENV TXT_METAGUESSER__PLUGINS=${PLUGINS}
 
 ENTRYPOINT ["pipenv", "run", "python3"]
 CMD ["main.py"]
