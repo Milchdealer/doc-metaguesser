@@ -3,6 +3,7 @@
     Contains the relations in the database and wraps them.
 """
 import os
+import logging
 from datetime import datetime
 
 from sqlalchemy import (
@@ -47,6 +48,7 @@ class MetadataStore(Base):
 
 def create_relations(engine, checkfirst: bool = True):
     """ Creates all relations needed. """
+    logging.info("Creating all relations.")
     Base.metadata.create_all(engine, checkfirst=checkfirst)
 
 
@@ -59,16 +61,18 @@ def make_connection():
             "user": os.getenv("TXT_METAGUESSER__SQL_ALCHEMY__USER", "root"),
             "password": os.getenv("TXT_METAGUESSER__SQL_ALCHEMY__PASSWORD"),
             "host": os.getenv("TXT_METAGUESSER__SQL_ALCHEMY__HOST", "localhost"),
+            "port": os.getenv("TXT_METAGUESSER__SQL_ALCHEMY__PORT", "3307"),
             "database": os.getenv(
                 "TXT_METAGUESSER__SQL_ALCHEMY__DATABASE", "documents"
             ),
         }
         library = os.getenv("TXT_METAGUESSER__SQL_ALCHEMY__LIBRARY", "mysql+pymysql")
-        sqlalchemy_uri = "%s://%s:%s@%s/%s" % (
+        sqlalchemy_uri = "%s://%s:%s@%s:%s/%s" % (
             library,
             sql_credentials["user"],
             sql_credentials["password"],
             sql_credentials["host"],
+            sql_credentials["port"],
             sql_credentials["database"],
         )
         del sql_credentials

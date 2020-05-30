@@ -7,8 +7,9 @@ import os
 from hashlib import sha1
 from typing import TextIO
 
-from db import DocumentStore
+from sqlalchemy import and_
 
+from db import DocumentStore
 
 MAX_CHECKSUM_INGEST_LENGTH = (
     1000  # If this is changed the checksums won't add up anymore.
@@ -24,7 +25,7 @@ def create_checksum(document: TextIO, reset_buffer: int = 0) -> str:
     if reset_buffer >= 0:
         document.seek(reset_buffer)
 
-    return sha1(content.encode("utf-8")).hexdigest()
+    return sha1(content.encode("utf-8")).digest()
 
 
 def guess_page_num(document: TextIO, reset_buffer: int = 0) -> int:
@@ -70,9 +71,11 @@ def get_or_create_document(file_path: str, session) -> DocumentStore:
         checksum = create_checksum(f)
         ds = (
             session.query(DocumentStore)
-            .filter_by(
-                DocumentStore.checksum == checksum,
-                DocumentStore.filename == os.path.basename(file_path),
+            .filter(
+                and_(
+                    DocumentStore.checksum == checksum,
+                    DocumentStore.filename == os.path.basename(file_path),
+                )
             )
             .first()
         )

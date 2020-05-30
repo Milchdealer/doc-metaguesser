@@ -1,9 +1,8 @@
 # Docker image for guessing meta information about documents.
-FROM python:3.7
+FROM python:3.7-slim
 
 LABEL MAINTAINER="Milchdealer"
 LABEL DESCRIPTION="Reads text and guesses meta information."
-
 
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \

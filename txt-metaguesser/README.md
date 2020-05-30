@@ -16,6 +16,7 @@ This tool parses the results and writes them to the metadatabase.
 | `TXT_METAGUESSER__SQL_ALCHEMY__USER` | User to the metadb | `root` |
 | `TXT_METAGUESSER__SQL_ALCHEMY__PASSWORD` | Password for the user | |
 | `TXT_METAGUESSER__SQL_ALCHEMY__HOST` | Hostname or IP of the metadb | `localhost` |
+| `TXT_METAGUESSER__SQL_ALCHEMY__PORT` | Port of the metadb | `3307` |
 | `TXT_METAGUESSER__SQL_ALCHEMY__DATABASE` | Database name  of the metadb | `documents` |
 | `TXT_METAGUESSER__SQL_ALCHEMY__LIBRARY` | Which SQL Alchemy connection library to use | `mysql+pymysql` |
 

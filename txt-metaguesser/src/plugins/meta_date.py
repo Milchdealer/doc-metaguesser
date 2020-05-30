@@ -16,37 +16,24 @@ from typing import Optional, List, Dict
 
 from db import DocumentStore, MetadataStore
 
-PATTERNS = [
-    {
-        "GERMAN_LONG": {
-            "regex": re.compile(r"\d{2}\.\d{2}\.\d{4}"),
-            "date_pattern": "%d.%m.%Y",
-        }
+PATTERNS = {
+    "GERMAN_LONG": {
+        "regex": re.compile(r"(\d{2}\.\d{2}\.\d{4})"),
+        "date_pattern": "%d.%m.%Y",
     },
-    {
-        "GERMAN_SHORT": {
-            "regex": re.compile(r"\d{2}\.\d{2}\.\d{2}"),
-            "date_pattern": "%d.%m.%y",
-        }
+    "GERMAN_SHORT": {
+        "regex": re.compile(r"(\d{2}\.\d{2}\.\d{2})"),
+        "date_pattern": "%d.%m.%y",
     },
-]
-
-
-def _validate_patterns(patterns: List[Dict]) -> bool:
-    """ Validates the patterns passed for their data structure. """
-
-    def _validate_pattern(pattern: Dict) -> bool:
-        return "regex" in pattern and "date_pattern" in pattern
-
-    all([_validate_pattern(p) for p in patterns])
+}
 
 
 def search_date_in_line(patterns: List[Dict], line: str) -> Optional[datetime]:
     """ Tries to find the date in the input. """
     for pattern in patterns:
-        last_match = pattern["regex"].search(line)
-        if last_match:
-            return datetime.strptime(last_match.group(0), pattern["date_pattern"])
+        match = pattern["regex"].search(line)
+        if match:
+            return datetime.strptime(match.group(0), pattern["date_pattern"])
     return None
 
 
@@ -61,10 +48,8 @@ def guess_metadata(document: DocumentStore) -> MetadataStore:
     patterns = [PATTERNS[name] for name in pattern_names.split(",") if name in PATTERNS]
     if not patterns:
         raise ValueError("No pattern specified")
-    if not _validate_patterns(patterns):
-        raise ValueError("Received an invalid data structure for patterns")
 
-    for line in document.content:
+    for line in document.content.split("\n"):
         document_date = search_date_in_line(patterns, line)
         if document_date:
             return MetadataStore(
