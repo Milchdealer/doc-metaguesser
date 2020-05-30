@@ -1,6 +1,6 @@
 # *-* coding: utf-8 *-*
 """
-	Contains the relations in the database and wraps them.
+    Contains the relations in the database and wraps them.
 """
 import os
 from datetime import datetime
@@ -17,6 +17,8 @@ from sqlalchemy import (
 from sqlalchemy.orm import Session
 from sqlalchemy.dialects.mysql import LONGTEXT
 from sqlalchemy.ext.declarative import declarative_base
+
+PAGE_SEPARATOR = "=" * 50
 
 Base = declarative_base()
 
@@ -61,7 +63,9 @@ def make_connection():
                 "TXT_METAGUESSER__SQL_ALCHEMY__DATABASE", "documents"
             ),
         }
-        sqlalchemy_uri = "mysql+pymysql://%s:%s@%s/%s" % (
+        library = os.getenv("TXT_METAGUESSER__SQL_ALCHEMY__LIBRARY", "mysql+pymysql")
+        sqlalchemy_uri = "%s://%s:%s@%s/%s" % (
+            library,
             sql_credentials["user"],
             sql_credentials["password"],
             sql_credentials["host"],

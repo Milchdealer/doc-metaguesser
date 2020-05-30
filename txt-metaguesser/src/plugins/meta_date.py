@@ -1,51 +1,74 @@
 # *-* coding: utf-8 *-*
 """
-	Module to for date related metadata.
+    Module to for date related metadata.
+
+    To define which patterns to use in which order, specify the TXT_METAGUESSER__META_DATE__PATTERNS
+    env variable with a comma-separated list of the dictionary names.
+    Example:
+    ```sh
+    export TXT_METAGUESSER__META_DATE__PATTERNS="GERMAN_LONG,GERMAN_SHORT"
+    ```
 """
+import os
 import re
-from datetime import datetime, date
-from typing import Generator, List, Dict, Union
+from datetime import datetime
+from typing import Optional, List, Dict
+
+from db import DocumentStore, MetadataStore
+
+PATTERNS = [
+    {
+        "GERMAN_LONG": {
+            "regex": re.compile(r"\d{2}\.\d{2}\.\d{4}"),
+            "date_pattern": "%d.%m.%Y",
+        }
+    },
+    {
+        "GERMAN_SHORT": {
+            "regex": re.compile(r"\d{2}\.\d{2}\.\d{2}"),
+            "date_pattern": "%d.%m.%y",
+        }
+    },
+]
 
 
-class DateMatching:
-	""" Class for matching dates in strings. """
-   	GERMAN_LONG = {
-	    "regex": re.compile(r"\d{2}\.\d{2}\.\d{4}"),
-	    "date_pattern": "%d.%m.%Y",
-	}
-	GERMAN_SHORT = {
-		"regex": re.compile(r"\d{2}\.\d{2}\.\d{2}"),
-		"date_pattern": "%d.%m.%y",
-	}
+def _validate_patterns(patterns: List[Dict]) -> bool:
+    """ Validates the patterns passed for their data structure. """
 
-	@staticmethod
-	def _validate_patterns(patterns: List[Dict]) -> bool:
-		""" Validates the patterns passed for their data structure. """
-		def _validate_pattern(pattern: Dict) -> bool:
-			return "regex" in pattern and "date_pattern" in pattern
+    def _validate_pattern(pattern: Dict) -> bool:
+        return "regex" in pattern and "date_pattern" in pattern
 
-		all([_validate_pattern(p) for p in patterns])
-		
-	def __init__(self, patterns: List[str], *args):
-		""" List of names of patterns to load, from the class, to load additional ones
-			provide the dicts with in form of {"regex": re, "date_pattern": str} as *args.
-			They will be loaded in order, and *args before patterns.
-		"""
-		self.patterns = args + [self.__getattribute__(pattern) for pattern in patterns]
+    all([_validate_pattern(p) for p in patterns])
 
-		if not DataMatching._validate_patterns(self.patterns):
-			raise ValueError("Received an invalid data structure for patterns")
 
-    def search_dates_in_line(self, line: str) -> Generator[date, None, None]:
-        """ Tries to find the date in the input. """
-        for pattern in self.patterns:
-        	correct_pattern = False
-	        last_match = pattern["regex"].search(line)
-	        while last_match:
-	        	correct_pattern = True
-	            yield datetime.strptime(last_match.group(0), pattern["date_pattern"]).date()
-	            last_match = pattern["regex"].search(line, last_match.span()[0] + 1)
-	        if correct_pattern:
-	        	# The patterns usually don't change within a document
-	        	break
+def search_date_in_line(patterns: List[Dict], line: str) -> Optional[datetime]:
+    """ Tries to find the date in the input. """
+    for pattern in patterns:
+        last_match = pattern["regex"].search(line)
+        if last_match:
+            return datetime.strptime(last_match.group(0), pattern["date_pattern"])
+    return None
 
+
+def guess_metadata(document: DocumentStore) -> MetadataStore:
+    """ Default callable which is used by guess_metadata() if this plugin is imported.
+        :param document: DocumentStore, Document to guess metadata for
+        :returns MetadataStore:
+    """
+    pattern_names = os.getenv(
+        "TXT_METAGUESSER__META_DATE__PATTERNS", "GERMAN_LONG,GERMAN_SHORT"
+    )
+    patterns = [PATTERNS[name] for name in pattern_names.split(",") if name in PATTERNS]
+    if not patterns:
+        raise ValueError("No pattern specified")
+    if not _validate_patterns(patterns):
+        raise ValueError("Received an invalid data structure for patterns")
+
+    for line in document.content:
+        document_date = search_date_in_line(patterns, line)
+        if document_date:
+            return MetadataStore(
+                document_id=document.id,
+                metadata_label="document_date",
+                metadata_value=document_date.strftime("%Y-%m-%d"),
+            )
