@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # *-* coding: utf-8 *-*
 """
     Tries to guess metadata about PDF documents.
